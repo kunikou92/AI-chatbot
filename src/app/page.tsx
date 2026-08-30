@@ -10,6 +10,30 @@ import MessageList from "@/components/MessageList";
 import ChatInput from "@/components/ChatInput";
 import { Message } from "@/types/chat";
 
+interface ChatApiResponse {
+  response?: string;
+  error?: string;
+}
+
+const apiTimeout = Number.parseInt(
+  process.env.NEXT_PUBLIC_API_TIMEOUT || "30000",
+  10
+);
+
+function getRequestErrorMessage(error: unknown): string {
+  if (error instanceof DOMException && error.name === "TimeoutError") {
+    return "応答がタイムアウトしました。通信状況を確認して、もう一度お試しください。";
+  }
+
+  if (error instanceof TypeError) {
+    return "サーバーに接続できませんでした。通信状況を確認して、もう一度お試しください。";
+  }
+
+  return error instanceof Error
+    ? error.message
+    : "予期しないエラーが発生しました。もう一度お試しください。";
+}
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,16 +62,23 @@ export default function ChatPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ message: content }),
+          signal: AbortSignal.timeout(
+            Number.isFinite(apiTimeout) ? apiTimeout : 30000
+          ),
         });
 
+        const data = (await response
+          .json()
+          .catch(() => ({}))) as ChatApiResponse;
+
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error || `API error: ${response.status}`
-          );
+          throw new Error(data.error || "AIから応答を取得できませんでした。");
         }
 
-        const data = await response.json();
+        if (!data.response) {
+          throw new Error("AIから空の応答が返されました。もう一度お試しください。");
+        }
+
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
@@ -57,9 +88,7 @@ export default function ChatPage() {
 
         setMessages((prev) => [...prev, aiMessage]);
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "エラーが発生しました";
-        setError(errorMessage);
+        setError(getRequestErrorMessage(err));
         console.error("Error sending message:", err);
       } finally {
         setIsLoading(false);
@@ -72,7 +101,11 @@ export default function ChatPage() {
     <div className="max-w-4xl mx-auto w-full h-full flex flex-col">
       {/* Error Message */}
       {error && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-4 mt-4">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-4 mt-4"
+        >
           <div className="flex">
             <div className="flex-shrink-0">
               <span className="text-xl">⚠️</span>
