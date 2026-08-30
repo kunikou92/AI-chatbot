@@ -34,8 +34,8 @@ export function validateEnvironment(): void {
 export function getGeminiConfig() {
   return {
     apiKey: process.env.GEMINI_API_KEY,
-    model: process.env.GEMINI_API_MODEL || 'gemini-pro',
-    version: process.env.GEMINI_API_VERSION || 'v1',
+    model: process.env.GEMINI_API_MODEL || 'gemini-3.6-flash',
+    version: process.env.GEMINI_API_VERSION || 'v1beta',
   };
 }
 

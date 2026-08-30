@@ -32,8 +32,8 @@ GEMINI_API_KEY=AIzaSyD...
 |------|-------------|------|
 | `NEXT_PUBLIC_APP_NAME` | `AI Chatbot` | アプリケーション名 |
 | `NEXT_PUBLIC_API_TIMEOUT` | `30000` | API呼び出しのタイムアウト（ミリ秒） |
-| `GEMINI_API_MODEL` | `gemini-pro` | 使用するGeminiモデル |
-| `GEMINI_API_VERSION` | `v1` | Gemini APIのバージョン |
+| `GEMINI_API_MODEL` | `gemini-3.6-flash` | 使用するGeminiモデル |
+| `GEMINI_API_VERSION` | `v1beta` | Gemini APIのバージョン |
 
 ### 4. 環境変数の検証
 

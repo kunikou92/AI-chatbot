@@ -10,7 +10,7 @@ export interface GeminiMessage {
 }
 
 export interface GeminiResponse {
-  candidates: Array<{
+  candidates?: Array<{
     content: {
       parts: Array<{
         text: string;
@@ -18,6 +18,16 @@ export interface GeminiResponse {
       role: string;
     };
   }>;
+  promptFeedback?: {
+    blockReason?: string;
+  };
+}
+
+interface GeminiErrorResponse {
+  error?: {
+    message?: string;
+    status?: string;
+  };
 }
 
 /**
@@ -29,10 +39,14 @@ export async function callGeminiAPI(userMessage: string): Promise<string> {
     throw new Error("GEMINI_API_KEY is not set");
   }
 
-  const apiModel = process.env.GEMINI_API_MODEL || "gemini-pro";
-  const apiVersion = process.env.GEMINI_API_VERSION || "v1";
+  const apiModel = process.env.GEMINI_API_MODEL || "gemini-3.6-flash";
+  const apiVersion = process.env.GEMINI_API_VERSION || "v1beta";
+  const timeoutMs = Number.parseInt(
+    process.env.GEMINI_API_TIMEOUT || "30000",
+    10
+  );
 
-  const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${apiModel}:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${apiModel}:generateContent`;
 
   const requestBody = {
     contents: [
@@ -71,34 +85,56 @@ export async function callGeminiAPI(userMessage: string): Promise<string> {
     ],
   };
 
-  try {
-    const response = await fetch(url, {
+  let response: Response | undefined;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
       },
       body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(
+        Number.isFinite(timeoutMs) ? timeoutMs : 30000
+      ),
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error("Gemini API error:", response.status, errorData);
-      throw new Error(
-        `Gemini API error: ${response.status} - ${errorData}`
-      );
+    if (![429, 503].includes(response.status) || attempt === 2) {
+      break;
     }
 
-    const data = (await response.json()) as GeminiResponse;
-
-    // Extract the response text
-    const firstCandidate = data.candidates?.[0];
-    if (!firstCandidate || !firstCandidate.content?.parts?.[0]?.text) {
-      throw new Error("Invalid response from Gemini API");
-    }
-
-    return firstCandidate.content.parts[0].text;
-  } catch (error) {
-    console.error("Error calling Gemini API:", error);
-    throw error;
+    await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** attempt));
   }
+
+  if (!response) {
+    throw new Error("Gemini API request could not be started");
+  }
+
+  if (!response.ok) {
+    const errorData = (await response
+      .json()
+      .catch(() => ({}))) as GeminiErrorResponse;
+    const detail = errorData.error?.message || response.statusText;
+    console.error("Gemini API error:", response.status, detail);
+    throw new Error(`Gemini API request failed (${response.status}): ${detail}`);
+  }
+
+  const data = (await response.json()) as GeminiResponse;
+
+  const text = data.candidates?.[0]?.content?.parts
+    ?.map((part) => part.text)
+    .filter(Boolean)
+    .join("");
+
+  if (!text) {
+    const reason = data.promptFeedback?.blockReason;
+    throw new Error(
+      reason
+        ? `Gemini blocked the request: ${reason}`
+        : "Gemini returned an empty response"
+    );
+  }
+
+  return text;
 }
