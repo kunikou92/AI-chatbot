@@ -14,16 +14,9 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isApiKeyMissing, setIsApiKeyMissing] = useState(false);
 
   const handleSendMessage = useCallback(
     async (content: string) => {
-      // Check if API key is available
-      if (!process.env.NEXT_PUBLIC_APP_NAME && process.env.NODE_ENV === "production") {
-        setIsApiKeyMissing(true);
-        return;
-      }
-
       // Create user message
       const userMessage: Message = {
         id: Date.now().toString(),
@@ -38,14 +31,31 @@ export default function ChatPage() {
       setIsLoading(true);
 
       try {
-        // TODO: Call API endpoint in next task
-        // For now, this is a placeholder
-        console.log("Message sent:", content);
+        // Call API endpoint
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: content }),
+        });
 
-        // Show a note that API is not yet integrated
-        setError(
-          "API 連携はタスク5で実装予定です。チャット入力は機能しています。"
-        );
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || `API error: ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: data.response,
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "エラーが発生しました";
@@ -81,7 +91,6 @@ export default function ChatPage() {
       <ChatInput
         onSendMessage={handleSendMessage}
         isLoading={isLoading}
-        disabled={isApiKeyMissing}
       />
     </div>
   );
