@@ -10,9 +10,3 @@ export interface Message {
 }
 
 export type ChatHistoryMessage = Pick<Message, "role" | "content">;
-
-export interface ChatState {
-  messages: Message[];
-  isLoading: boolean;
-  error: string | null;
-}

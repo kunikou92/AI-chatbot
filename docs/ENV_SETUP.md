@@ -31,23 +31,24 @@ GEMINI_API_KEY=AIzaSyD...
 | 変数 | デフォルト値 | 説明 |
 |------|-------------|------|
 | `NEXT_PUBLIC_APP_NAME` | `AI Chatbot` | アプリケーション名 |
-| `NEXT_PUBLIC_API_TIMEOUT` | `30000` | API呼び出しのタイムアウト（ミリ秒） |
+| `NEXT_PUBLIC_API_TIMEOUT` | `30000` | ブラウザ側のタイムアウト（ミリ秒） |
+| `GEMINI_API_TIMEOUT` | `30000` | Gemini API側のタイムアウト（ミリ秒） |
+| `API_RATE_LIMIT_PER_MINUTE` | `20` | 1クライアントあたりの毎分リクエスト数 |
 | `GEMINI_API_MODEL` | `gemini-3.6-flash` | 使用するGeminiモデル |
 | `GEMINI_API_VERSION` | `v1beta` | Gemini APIのバージョン |
 
 ### 4. 環境変数の検証
 
-開発サーバー起動時に環境変数は自動的に検証されます。
+APIキーが未設定の場合、チャットAPIは利用者向けの設定エラーを返します。
 
 ```bash
 npm run dev
 ```
 
-必須環境変数が設定されていない場合、エラーメッセージが表示されます：
+必須環境変数が設定されていない場合、画面に次の内容が表示されます：
 
 ```
-❌ Missing environment variables: GEMINI_API_KEY
-Please check your .env.local file and add the missing values.
+AIサービスのAPIキーが設定されていません。管理者にお問い合わせください。
 ```
 
 ### 5. 本番環境への対応

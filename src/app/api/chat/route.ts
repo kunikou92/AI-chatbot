@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callGeminiAPI } from "@/lib/gemini";
 import type { ChatHistoryMessage } from "@/types/chat";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -26,6 +27,22 @@ function isChatHistoryMessage(value: unknown): value is ChatHistoryMessage {
 }
 
 export async function POST(request: NextRequest) {
+  const clientId =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "anonymous";
+  const rateLimit = checkRateLimit(clientId);
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "リクエストが多すぎます。少し待ってからもう一度お試しください。" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      }
+    );
+  }
+
   try {
     // Validate API key is set
     if (!process.env.GEMINI_API_KEY) {
@@ -36,7 +53,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse request body
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { error: "リクエストの形式が正しくありません。" },
+        { status: 400 }
+      );
+    }
     const { messages } = body;
 
     if (!Array.isArray(messages) || messages.length === 0) {
