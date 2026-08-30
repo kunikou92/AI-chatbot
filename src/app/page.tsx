@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 import MessageList from "@/components/MessageList";
 import ChatInput from "@/components/ChatInput";
 import { ChatHistoryMessage, Message } from "@/types/chat";
@@ -38,9 +38,13 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isSubmittingRef = useRef(false);
 
   const handleSendMessage = useCallback(
     async (content: string) => {
+      if (isSubmittingRef.current) return;
+      isSubmittingRef.current = true;
+
       // Create user message
       const userMessage: Message = {
         id: crypto.randomUUID(),
@@ -103,6 +107,7 @@ export default function ChatPage() {
         setError(getRequestErrorMessage(err));
         console.error("Error sending message:", err);
       } finally {
+        isSubmittingRef.current = false;
         setIsLoading(false);
       }
     },
