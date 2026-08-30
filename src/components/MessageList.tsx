@@ -23,12 +23,18 @@ export default function MessageList({
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      scrollRef.current.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "end",
+      });
     }
   }, [messages, isLoading]);
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+    <div className="flex-1 min-h-0 overflow-y-auto px-3 py-4 sm:px-6 sm:py-6 lg:px-8 space-y-4">
       {messages.length === 0 ? (
         <div className="flex justify-center items-center h-full">
           <div className="text-center">
@@ -68,7 +74,7 @@ export default function MessageList({
               </div>
             </div>
           )}
-          <div ref={scrollRef} />
+          <div ref={scrollRef} aria-hidden="true" />
         </>
       )}
     </div>
