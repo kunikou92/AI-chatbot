@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Chatbot
 
-## Getting Started
+Next.js で構築する Gemini API を使ったチャットアプリです。
 
-First, run the development server:
+## 概要
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+このアプリは、ユーザーがブラウザ上でメッセージを入力し、Gemini API を使って応答を受け取ることができるシンプルなチャットアプリです。
+
+今回の前提では、以下の方向性で開発します。
+
+- 対象: 一般公開を想定した利用者向け
+- 主目的: Gemini API を使った基本的なチャット機能を提供する
+- 優先順位: 最低限動くMVPを優先し、機能を段階的に拡張できるようにする
+
+## 目標
+
+- ユーザーがブラウザでメッセージを送信できる
+- Gemini API からテキスト応答を受け取れる
+- 会話中にローディングとエラー状態を表示できる
+- UI はシンプルで使いやすく、モバイルでも見やすい
+
+## 主な機能
+
+- メッセージの送信
+- Gemini API を利用した応答生成
+- 会話履歴の表示
+- ローディング中の状態表示
+- エラー時のメッセージ表示
+- レスポンシブデザイン
+
+## 技術スタック
+
+- Next.js
+- React
+- TypeScript
+- Gemini API
+- Tailwind CSS（または必要に応じて簡易スタイル）
+
+## 想定されるユーザー体験
+
+1. ユーザーが入力欄に質問やメッセージを入力する
+2. 送信ボタンを押す
+3. アプリが API にリクエストを送る
+4. Gemini が応答を返す
+5. 応答がチャット一覧に表示される
+6. エラーやネットワーク失敗が起きた場合は適切に案内される
+
+## 実装方針
+
+- API キーはサーバー側で管理する
+- クライアントから直接 API を呼ばず、Next.js の API Route などを経由させる
+- 初期段階では単一会話画面を基本にする
+- 将来的に会話履歴保存、セッション管理、モデル選択などを拡張しやすい構成にする
+
+## 必須環境
+
+- Node.js
+- npm または pnpm
+- Gemini API キー
+
+## 環境変数
+
+以下の環境変数を設定する想定です。
+
+```env
+GEMINI_API_KEY=your_api_key_here
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+必要に応じて、以下のような変数も追加できます。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_APP_NAME=AI Chatbot
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## セットアップ手順
 
-## Learn More
+```bash
+npm install
+cp .env.example .env.local
+# .env.local に GEMINI_API_KEY を設定
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 主要な開発ルール
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- シンプルで保守しやすい構成を優先する
+- API 呼び出しはサーバー側に集約する
+- UI は最小限の機能に絞り、初期の見た目を確実に整える
+- エラー時の表示を必ず用意する
+- まずは MVP を完了してから改善フェーズに進む
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## MVP の範囲
 
-## Deploy on Vercel
+初期版では次の範囲を対象とします。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- チャット入力フォーム
+- Gemini API への送信
+- 応答の表示
+- ローディング表示
+- エラー表示
+- レスポンシブ対応
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 今後の拡張候補
+
+- 会話履歴の保存
+- 会話ごとのタイトル生成
+- マルチモデル切り替え
+- 会話削除機能
+- Streaming 応答の導入
+- 認証付きユーザー管理
+
+## 注意事項
+
+- Gemini API キーは公開リポジトリに含めないこと
+- 本番環境ではレート制限やエラー処理を追加すること
+- 一般公開前には利用規約、プライバシー方針、API 利用料の管理を検討すること
+
+## まとめ
+
+このプロジェクトは、Next.js と Gemini API を組み合わせた最小構成のチャットアプリを、短期間で実運用可能なMVPとして作ることを目的とします。
+
+最初に動くことを優先し、必要に応じてその後に履歴管理やUX強化などを追加していく構成を採用します。
