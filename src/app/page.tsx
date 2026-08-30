@@ -110,13 +110,13 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="max-w-4xl mx-auto w-full h-full flex flex-col">
+    <div className="max-w-4xl mx-auto w-full h-full min-h-0 flex flex-col">
       {/* Error Message */}
       {error && (
         <div
           role="alert"
           aria-live="assertive"
-          className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-4 mt-4"
+          className="bg-yellow-50 border-l-4 border-yellow-400 p-3 mx-3 mt-3 sm:p-4 sm:mx-4 sm:mt-4"
         >
           <div className="flex">
             <div className="flex-shrink-0">

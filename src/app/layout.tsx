@@ -32,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="h-full bg-gray-50">
         <div className="flex flex-col h-full">
           <Header />
-          <main className="flex-1 overflow-auto">
+          <main className="min-h-0 flex-1 overflow-hidden">
             {children}
           </main>
         </div>
