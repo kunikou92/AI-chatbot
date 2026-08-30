@@ -5,8 +5,25 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { callGeminiAPI } from "@/lib/gemini";
+import type { ChatHistoryMessage } from "@/types/chat";
 
 export const runtime = "nodejs";
+
+const maxHistoryLength = 50;
+
+function isChatHistoryMessage(value: unknown): value is ChatHistoryMessage {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const message = value as Partial<ChatHistoryMessage>;
+  return (
+    (message.role === "user" || message.role === "assistant") &&
+    typeof message.content === "string" &&
+    message.content.trim().length > 0 &&
+    message.content.length <= 10000
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,26 +37,27 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { message } = body;
+    const { messages } = body;
 
-    // Validate message
-    if (!message || typeof message !== "string") {
+    if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
-        { error: "Message is required and must be a string" },
+        { error: "Conversation history is required" },
         { status: 400 }
       );
     }
 
-    const trimmedMessage = message.trim();
-    if (!trimmedMessage) {
+    if (
+      messages.length > maxHistoryLength ||
+      !messages.every(isChatHistoryMessage) ||
+      messages.at(-1)?.role !== "user"
+    ) {
       return NextResponse.json(
-        { error: "Message cannot be empty" },
+        { error: "Conversation history is invalid" },
         { status: 400 }
       );
     }
 
-    // Call Gemini API
-    const response = await callGeminiAPI(trimmedMessage);
+    const response = await callGeminiAPI(messages);
 
     return NextResponse.json({ response }, { status: 200 });
   } catch (error) {

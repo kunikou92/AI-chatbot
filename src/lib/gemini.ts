@@ -31,9 +31,11 @@ interface GeminiErrorResponse {
 }
 
 /**
- * Call Gemini API with a message
+ * Call Gemini API with conversation history
  */
-export async function callGeminiAPI(userMessage: string): Promise<string> {
+export async function callGeminiAPI(
+  messages: Array<{ role: "user" | "assistant"; content: string }>
+): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not set");
@@ -49,16 +51,12 @@ export async function callGeminiAPI(userMessage: string): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${apiModel}:generateContent`;
 
   const requestBody = {
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: userMessage,
-          },
-        ],
-      },
-    ],
+    contents: messages.map(
+      (message): GeminiMessage => ({
+        role: message.role === "assistant" ? "model" : "user",
+        parts: [{ text: message.content }],
+      })
+    ),
     generationConfig: {
       temperature: 0.7,
       topK: 40,

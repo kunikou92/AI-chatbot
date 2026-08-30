@@ -9,6 +9,8 @@ export interface Message {
   timestamp: Date;
 }
 
+export type ChatHistoryMessage = Pick<Message, "role" | "content">;
+
 export interface ChatState {
   messages: Message[];
   isLoading: boolean;

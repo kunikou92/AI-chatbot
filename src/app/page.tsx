@@ -8,7 +8,7 @@
 import { useState, useCallback } from "react";
 import MessageList from "@/components/MessageList";
 import ChatInput from "@/components/ChatInput";
-import { Message } from "@/types/chat";
+import { ChatHistoryMessage, Message } from "@/types/chat";
 
 interface ChatApiResponse {
   response?: string;
@@ -43,13 +43,25 @@ export default function ChatPage() {
     async (content: string) => {
       // Create user message
       const userMessage: Message = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         role: "user",
         content,
         timestamp: new Date(),
       };
 
       // Update messages and clear error
+      const conversationHistory: ChatHistoryMessage[] = [
+        ...messages,
+        userMessage,
+      ].map(({ role, content: messageContent }) => ({
+        role,
+        content: messageContent,
+      })).slice(-50);
+
+      if (conversationHistory[0]?.role === "assistant") {
+        conversationHistory.shift();
+      }
+
       setMessages((prev) => [...prev, userMessage]);
       setError(null);
       setIsLoading(true);
@@ -61,7 +73,7 @@ export default function ChatPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ message: content }),
+          body: JSON.stringify({ messages: conversationHistory }),
           signal: AbortSignal.timeout(
             Number.isFinite(apiTimeout) ? apiTimeout : 30000
           ),
@@ -80,7 +92,7 @@ export default function ChatPage() {
         }
 
         const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
+          id: crypto.randomUUID(),
           role: "assistant",
           content: data.response,
           timestamp: new Date(),
@@ -94,7 +106,7 @@ export default function ChatPage() {
         setIsLoading(false);
       }
     },
-    []
+    [messages]
   );
 
   return (
