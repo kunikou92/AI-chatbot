@@ -28,7 +28,7 @@ export default function MessageList({
   }, [messages, isLoading]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+    <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
       {messages.length === 0 ? (
         <div className="flex justify-center items-center h-full">
           <div className="text-center">
