@@ -1,91 +1,115 @@
-# Gemini API Model エラー対応
+# Gemini API 無料版の設定ガイド
 
-## エラー内容
+## エラーの原因
 
 ```
-Gemini API error: 404 - {
-  "error": {
-    "code": 404,
-    "message": "models/gemini-pro is not found for API version v1, 
-               or is not supported for generateContent. 
-               Call ModelService.ListModels to see the list of available models 
-               and their supported methods.",
-    "status": "NOT_FOUND"
-  }
-}
+Gemini API error: 404 - models/gemini-1.5-pro is not found
 ```
 
-## 原因
+### 根本原因
 
-### 1. **モデル名が古い（推奨理由）**
-   - `gemini-pro` は Google が廃止した古いモデル名
-   - 現在の Gemini API では利用できない
-   - Google は常に最新のモデルのみをサポート
+`gemini-1.5-pro` は **Google Cloud の有料プランが必要** なため、無料版では使用できません。
 
-### 2. **API バージョンが不正**
-   - `v1` は完全には非推奨ではないが、`v1beta` の方が推奨される
-   - 新機能は `v1beta` に実装される
+- **有料版が必要**: `gemini-pro`, `gemini-1.5-pro`, `gemini-2.0-pro`
+- **無料版で利用可**: `gemini-1.5-flash` のみ
 
-## 解決策
+## 解決策：無料版で利用可能なモデル
 
-### 変更内容
+### 推奨設定（無料版）
 
-| 項目 | 旧値 | 新値 | 理由 |
-|------|------|------|------|
-| モデル名 | `gemini-pro` | `gemini-1.5-pro` | 現在利用可能な最新モデル |
-| API バージョン | `v1` | `v1beta` | 最新機能対応 |
+```env
+GEMINI_API_MODEL=gemini-1.5-flash
+GEMINI_API_VERSION=v1
+```
 
-### 利用可能なモデル一覧
+**gemini-1.5-flash** は Google が無料版向けに提供している高速モデルです。
 
-| モデル名 | 特徴 | 用途 |
-|---------|------|------|
-| `gemini-1.5-pro` | **推奨** - 高精度 | 複雑な推論、長文処理 |
-| `gemini-1.5-flash` | 高速、低コスト | 短時間応答が必要な場合 |
-| `gemini-2.0-pro` | 最新（プレビュー） | 最新機能が必要な場合 |
+### モデル比較表
+
+| モデル | 提供方式 | API 版 | 推奨用途 |
+|--------|---------|--------|---------|
+| **gemini-1.5-flash** | 📌 **無料** | v1 | このアプリで使用（推奨） |
+| gemini-1.5-pro | 💰 有料 | v1/v1beta | 高精度が必要な場合 |
+| gemini-2.0-pro | 💰 有料 | v1beta | 最新機能が必要な場合 |
+| gemini-pro | 💰 有料 | v1 | 古いモデル（廃止予定） |
+
+## 無料版の制限事項
+
+### レート制限（Rate Limit）
+
+| 項目 | 制限 |
+|------|------|
+| リクエスト数 | 1 分あたり 60 回まで |
+| 1 日あたりのリクエスト数 | 無制限 |
+| トークン数 | 1 分あたり 4,000 トークン |
+
+### 使用限度
+
+- 無料版では **毎月一定量まで無料** で使用可能
+- 超過すると自動的に遮断されます
+- [Google AI Studio ダッシュボード](https://aistudio.google.com) で使用量を確認
 
 ## 更新ファイル一覧
 
-1. `.env.example`
-   ```env
-   GEMINI_API_MODEL=gemini-1.5-pro
-   GEMINI_API_VERSION=v1beta
-   ```
+### 1. `.env.example` と `.env.local`
 
-2. `.env.local`
-   ```env
-   GEMINI_API_MODEL=gemini-1.5-pro
-   GEMINI_API_VERSION=v1beta
-   ```
+```env
+# API設定
+# Free tier: gemini-1.5-flash
+GEMINI_API_MODEL=gemini-1.5-flash
+GEMINI_API_VERSION=v1
+```
 
-3. `src/lib/gemini.ts`
-   ```typescript
-   const apiModel = process.env.GEMINI_API_MODEL || "gemini-1.5-pro";
-   const apiVersion = process.env.GEMINI_API_VERSION || "v1beta";
-   ```
+### 2. `src/lib/gemini.ts`
 
-## 検証方法
+```typescript
+const apiModel = process.env.GEMINI_API_MODEL || "gemini-1.5-flash";
+const apiVersion = process.env.GEMINI_API_VERSION || "v1";
+```
 
-修正後、以下の手順で動作確認してください：
+## gemini-1.5-flash の特徴
 
-1. 開発サーバーを再起動
-   ```bash
-   npm run dev
-   ```
+### 利点
+- ✅ 完全無料
+- ✅ 高速レスポンス（数百ミリ秒）
+- ✅ 日本語対応
+- ✅ チャットに最適
 
-2. ブラウザで http://localhost:3000 を開く
+### 注意点
+- ⚠️ gemini-1.5-pro より精度が低い場合がある
+- ⚠️ レート制限あり
+- ⚠️ 複雑な推論タスクには向かない
 
-3. テストメッセージを送信
-   - 例：「こんにちは」
-   - AI が正常に応答することを確認
+## 有料版への移行方法
 
-## Google Gemini API ドキュメント
+もし高精度が必要な場合、有料版へ移行できます：
 
-- [Gemini API 公式ドキュメント](https://ai.google.dev/)
-- [利用可能なモデル一覧](https://ai.google.dev/models)
-- [API リファレンス](https://ai.google.dev/api)
+1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
+2. Billing を有効化（クレジットカード登録）
+3. Vertex AI API を有効化
+4. API キーを取得
+5. 環境変数を以下に変更：
 
-## 注意事項
+```env
+GEMINI_API_MODEL=gemini-1.5-pro
+GEMINI_API_VERSION=v1beta
+```
 
-- 新しいモデルが発表されると、このドキュメントを更新する必要があります
-- `.env.local` は機密情報のため、絶対にリポジトリにコミットしないこと
-- プロダクション環境では、Vercel などのホスティングサービスで環境変数を設定してください
+## トラブルシューティング
+
+### Q: それでも 404 エラーが出る場合
+- A: `npm run dev` を再起動して環境変数をリロードしてください
+
+### Q: レート制限エラーが出た
+- A: API リクエストの間隔を長くするか、有料版に移行してください
+
+### Q: 日本語が正しく処理されない
+- A: 入力メッセージの前に「日本語で回答してください」と指示を追加
+
+## 参考資料
+
+- [Google AI Studio（無料版 API キー取得）](https://aistudio.google.com/)
+- [Gemini API 価格表](https://ai.google.dev/pricing)
+- [Gemini API ドキュメント](https://ai.google.dev/)
+- [使用量確認（Google AI Studio ダッシュボード）](https://aistudio.google.com/app/home)
+
