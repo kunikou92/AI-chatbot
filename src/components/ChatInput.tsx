@@ -43,6 +43,7 @@ export default function ChatInput({
   return (
     <form
       onSubmit={handleSubmit}
+      aria-busy={isLoading}
       className="border-t border-gray-200 bg-white px-4 sm:px-6 lg:px-8 py-4"
     >
       <div className="max-w-4xl mx-auto">
@@ -60,6 +61,7 @@ export default function ChatInput({
           <button
             type="submit"
             disabled={isDisabled}
+            aria-disabled={isDisabled}
             className="px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500 whitespace-nowrap"
           >
             {isLoading ? "送信中..." : "送信"}

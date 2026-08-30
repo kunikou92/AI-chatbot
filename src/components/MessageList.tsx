@@ -49,11 +49,17 @@ export default function MessageList({
             <Message key={message.id} message={message} />
           ))}
           {isLoading && (
-            <div className="flex gap-3 mb-4">
+            <div
+              role="status"
+              aria-live="polite"
+              aria-label="AIが応答を生成しています"
+              className="flex gap-3 mb-4"
+            >
               <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-bold">AI</span>
               </div>
               <div className="bg-gray-200 text-gray-900 px-4 py-2 rounded-lg rounded-bl-none">
+                <span className="sr-only">AIが応答を生成しています</span>
                 <div className="flex gap-1 items-center">
                   <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-100"></div>

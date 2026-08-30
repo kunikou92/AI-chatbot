@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
     // Validate API key is set
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY is not configured" },
-        { status: 500 }
+        { error: "AIサービスのAPIキーが設定されていません。管理者にお問い合わせください。" },
+        { status: 503 }
       );
     }
 
@@ -45,9 +45,16 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Chat API error:", error);
 
-    const errorMessage =
-      error instanceof Error ? error.message : "Internal server error";
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      return NextResponse.json(
+        { error: "AIサービスからの応答がタイムアウトしました。もう一度お試しください。" },
+        { status: 504 }
+      );
+    }
 
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { error: "AIサービスとの通信に失敗しました。しばらくしてからもう一度お試しください。" },
+      { status: 502 }
+    );
   }
 }
