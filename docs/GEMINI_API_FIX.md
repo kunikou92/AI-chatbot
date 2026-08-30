@@ -3,38 +3,39 @@
 ## エラーの原因
 
 ```
-Gemini API error: 404 - models/gemini-1.5-pro is not found
+Gemini API error: 404 - models/gemini-1.5-flash is not found for API version v1beta
 ```
 
 ### 根本原因
 
-`gemini-1.5-pro` は **Google Cloud の有料プランが必要** なため、無料版では使用できません。
+Google AI Studio（無料版）の API キーでは、最新のモデル（`gemini-1.5-flash`, `gemini-1.5-pro`）は利用できません。
 
-- **有料版が必要**: `gemini-pro`, `gemini-1.5-pro`, `gemini-2.0-pro`
-- **無料版で利用可**: `gemini-1.5-flash` のみ
+- **無料版で利用可**: `gemini-pro` のみ（v1 エンドポイント）
+- **有料版が必要**: `gemini-1.5-pro`、`gemini-1.5-flash` など
+
+⚠️ 最新モデルが無料で使えると思われていますが、Google Cloud のリソースが必要です。
 
 ## 解決策：無料版で利用可能なモデル
 
 ### 推奨設定（無料版）
 
 ```env
-GEMINI_API_MODEL=gemini-1.5-flash
-GEMINI_API_VERSION=v1beta
+GEMINI_API_MODEL=gemini-pro
+GEMINI_API_VERSION=v1
 ```
 
-**gemini-1.5-flash** は Google が無料版向けに提供している高速モデルです。  
-⚠️ **重要**: gemini-1.5-flash は v1beta API バージョンが必須です（v1 では動作しません）
+**gemini-pro** は Google AI Studio（無料）で実際に利用できる唯一のモデルです。
 
 ### モデル比較表
 
-| モデル | 提供方式 | API 版 | 推奨用途 |
+| モデル | 提供方式 | API 版 | 入手方法 |
 |--------|---------|--------|---------|
-| **gemini-1.5-flash** | 📌 **無料** | **v1beta** ⚠️ | このアプリで使用（推奨） |
-| gemini-1.5-pro | 💰 有料 | v1/v1beta | 高精度が必要な場合 |
-| gemini-2.0-pro | 💰 有料 | v1beta | 最新機能が必要な場合 |
-| gemini-pro | 💰 有料 | v1 | 古いモデル（廃止予定） |
+| **gemini-pro** | 📌 **無料** | v1 | AI Studio（このアプリで使用） |
+| gemini-1.5-flash | 💰 有料（Paid Tier） | v1beta | Google Cloud のみ |
+| gemini-1.5-pro | 💰 有料（Paid Tier） | v1/v1beta | Google Cloud のみ |
+| gemini-2.0-pro | 💰 有料（Paid Tier） | v1beta | Google Cloud のみ |
 
-⚠️ **注意**: gemini-1.5-flash は必ず v1beta を使用してください。v1 では 404 エラーになります。
+⚠️ **重要**: Google AI Studio（無料）では `gemini-pro` のみが利用可能です。他のモデルは Google Cloud（クレジットカード必須）が必要です。
 
 ## 無料版の制限事項
 
@@ -58,16 +59,16 @@ GEMINI_API_VERSION=v1beta
 
 ```env
 # API設定
-# Free tier: gemini-1.5-flash with v1beta
-GEMINI_API_MODEL=gemini-1.5-flash
-GEMINI_API_VERSION=v1beta
+# Free tier model: gemini-pro with v1 endpoint
+GEMINI_API_MODEL=gemini-pro
+GEMINI_API_VERSION=v1
 ```
 
 ### 2. `src/lib/gemini.ts`
 
 ```typescript
-const apiModel = process.env.GEMINI_API_MODEL || "gemini-1.5-flash";
-const apiVersion = process.env.GEMINI_API_VERSION || "v1beta";
+const apiModel = process.env.GEMINI_API_MODEL || "gemini-pro";
+const apiVersion = process.env.GEMINI_API_VERSION || "v1";
 ```
 
 ## gemini-1.5-flash の特徴

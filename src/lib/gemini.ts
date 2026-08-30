@@ -29,8 +29,8 @@ export async function callGeminiAPI(userMessage: string): Promise<string> {
     throw new Error("GEMINI_API_KEY is not set");
   }
 
-  const apiModel = process.env.GEMINI_API_MODEL || "gemini-1.5-flash";
-  const apiVersion = process.env.GEMINI_API_VERSION || "v1beta";
+  const apiModel = process.env.GEMINI_API_MODEL || "gemini-pro";
+  const apiVersion = process.env.GEMINI_API_VERSION || "v1";
 
   const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${apiModel}:generateContent?key=${apiKey}`;
 
