@@ -30,7 +30,7 @@ export async function callGeminiAPI(userMessage: string): Promise<string> {
   }
 
   const apiModel = process.env.GEMINI_API_MODEL || "gemini-1.5-flash";
-  const apiVersion = process.env.GEMINI_API_VERSION || "v1";
+  const apiVersion = process.env.GEMINI_API_VERSION || "v1beta";
 
   const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${apiModel}:generateContent?key=${apiKey}`;
 

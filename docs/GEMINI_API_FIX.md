@@ -19,19 +19,22 @@ Gemini API error: 404 - models/gemini-1.5-pro is not found
 
 ```env
 GEMINI_API_MODEL=gemini-1.5-flash
-GEMINI_API_VERSION=v1
+GEMINI_API_VERSION=v1beta
 ```
 
-**gemini-1.5-flash** は Google が無料版向けに提供している高速モデルです。
+**gemini-1.5-flash** は Google が無料版向けに提供している高速モデルです。  
+⚠️ **重要**: gemini-1.5-flash は v1beta API バージョンが必須です（v1 では動作しません）
 
 ### モデル比較表
 
 | モデル | 提供方式 | API 版 | 推奨用途 |
 |--------|---------|--------|---------|
-| **gemini-1.5-flash** | 📌 **無料** | v1 | このアプリで使用（推奨） |
+| **gemini-1.5-flash** | 📌 **無料** | **v1beta** ⚠️ | このアプリで使用（推奨） |
 | gemini-1.5-pro | 💰 有料 | v1/v1beta | 高精度が必要な場合 |
 | gemini-2.0-pro | 💰 有料 | v1beta | 最新機能が必要な場合 |
 | gemini-pro | 💰 有料 | v1 | 古いモデル（廃止予定） |
+
+⚠️ **注意**: gemini-1.5-flash は必ず v1beta を使用してください。v1 では 404 エラーになります。
 
 ## 無料版の制限事項
 
@@ -55,16 +58,16 @@ GEMINI_API_VERSION=v1
 
 ```env
 # API設定
-# Free tier: gemini-1.5-flash
+# Free tier: gemini-1.5-flash with v1beta
 GEMINI_API_MODEL=gemini-1.5-flash
-GEMINI_API_VERSION=v1
+GEMINI_API_VERSION=v1beta
 ```
 
 ### 2. `src/lib/gemini.ts`
 
 ```typescript
 const apiModel = process.env.GEMINI_API_MODEL || "gemini-1.5-flash";
-const apiVersion = process.env.GEMINI_API_VERSION || "v1";
+const apiVersion = process.env.GEMINI_API_VERSION || "v1beta";
 ```
 
 ## gemini-1.5-flash の特徴
